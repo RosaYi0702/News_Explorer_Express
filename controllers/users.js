@@ -48,6 +48,9 @@ const signUp = async (req, res, next) => {
     if (err.name === "ValidationError") {
       return next(new BadRequestError("Validation Error"));
     }
+    if (err.code === 11000) {
+      return res.status(409).send({ message: "Email already exists." });
+    }
     return next(new ServerError("Server Error"));
   }
 };
