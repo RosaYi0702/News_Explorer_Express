@@ -3,7 +3,7 @@ const { ERROR_CODES, ERROR_MESSAGES } = require("../utils/errors");
 const { signIn, signUp } = require("../controllers/users");
 const userRouter = require("./users");
 const newsRouter = require("./news");
-const authMiddleware = require("../middlewares/auth");
+const authMiddleware = require("../middleware/auth");
 const { getNewsItems } = require("../controllers/newsItem");
 
 router.post("/signin", signIn);

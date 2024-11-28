@@ -4,13 +4,15 @@ const mongoose = require("mongoose");
 const helmet = require("helmet");
 require("dotenv").config();
 const { errors } = require("celebrate");
-const limiter = require("./middlewares/limiter");
+const limiter = require("./middleware/limiter");
 const mainRouter = require("./routes/index");
-const errorHandler = require("./middlewares/error-handler");
-const { requestLogger, errorLogger } = require("./middlewares/logger");
+const errorHandler = require("./middleware/error-handler");
+const { requestLogger, errorLogger } = require("./middleware/logger");
 
 const app = express();
 const { PORT = 3001 } = process.env;
+
+mongoose.set("strictQuery", true);
 
 mongoose
   .connect("mongodb://127.0.0.1:27017/news_db")
