@@ -35,6 +35,11 @@ const signUp = async (req, res, next) => {
       .send({ message: "All fields are required." });
   }
   try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await User.create({
       email,
@@ -48,10 +53,6 @@ const signUp = async (req, res, next) => {
     console.error(err);
     if (err.name === "ValidationError") {
       return next(new BadRequestError("Validation Error"));
-    }
-
-    if (err.code === 11000) {
-      return res.status(409).send({ message: "Email already exists." });
     }
 
     return next(new ServerError("Server Error"));
