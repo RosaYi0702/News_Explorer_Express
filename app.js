@@ -15,9 +15,12 @@ const { PORT = 3001 } = process.env;
 mongoose.set("strictQuery", true);
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017/news_db")
+  .connect("mongodb://127.0.0.1:27017/news_db", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
-    console.log("Connect to DB");
+    console.log("connect to DB");
   })
   .catch(console.error);
 

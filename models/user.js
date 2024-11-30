@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -6,7 +7,6 @@ const userSchema = new mongoose.Schema({
     require: true,
     minlength: 2,
     maxlength: 30,
-    unique: true,
   },
   password: {
     type: String,
@@ -26,4 +26,4 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.modelNames("user", userSchema);
+module.exports = mongoose.model("User", userSchema);

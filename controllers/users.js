@@ -41,22 +41,26 @@ const signUp = async (req, res, next) => {
       password: hashedPassword,
       username,
     });
-    const { password: _, ...userWithoutPassword } = user.toObject();
-    res.status(201).send(userWithoutPassword);
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+
+    res.status(201).send({ token, username: user.username, email: user.email });
   } catch (err) {
     console.error(err);
     if (err.name === "ValidationError") {
       return next(new BadRequestError("Validation Error"));
     }
+
     if (err.code === 11000) {
       return res.status(409).send({ message: "Email already exists." });
     }
+
     return next(new ServerError("Server Error"));
   }
 };
 
 const signIn = async (req, res, next) => {
   const { email, password } = req.body;
+  console.log("Incoming request:", req.body);
 
   if (!email || !password) {
     return next(new BadRequestError("Email and Password are required"));
