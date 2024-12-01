@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
 
-const newsSchema = new mongoose.Schema({
+const articleSchema = new mongoose.Schema({
   source: {
     id: { type: String, require: true },
     name: { type: String, require: true },
@@ -40,4 +40,4 @@ const newsSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("news", newsSchema);
+module.exports = mongoose.model("Article", articleSchema);

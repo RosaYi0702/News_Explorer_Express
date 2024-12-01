@@ -1,8 +1,8 @@
-const NewsItems = require("../models/newsItem");
+const Article = require("../models/newsItem");
 const { ERROR_CODES, ERROR_MESSAGES } = require("../utils/errors");
 
 const getNewsItems = (req, res) => {
-  NewsItems.find({ owner: req.user.userId })
+  Article.find({ owner: req.user.userId })
     .then((items) => res.send({ items }))
     .catch((err) => {
       console.error(err);
@@ -31,28 +31,43 @@ const saveNewsItem = (req, res) => {
       .send({ message: ERROR_MESSAGES.BAD_REQUEST });
   }
 
-  const newsItem = new NewsItems({
-    source,
-    author,
-    title,
-    description,
-    url,
-    urlToImage,
-    publishedAt,
-    content,
-    saved: true,
-    keyword,
-    owner: req.user.userId,
-  });
+  Article.findOne({ url, owner: req.user.userId })
+    .then((existingArticle) => {
+      if (existingArticle) {
+        return res.status(409).send({ message: "Article already saved" });
+      }
 
-  newsItem
-    .save()
-    .then((item) =>
-      res.status(201).send({ message: "News item saved successfully", item })
-    )
+      const newsItem = new Article({
+        source,
+        author,
+        title,
+        description,
+        url,
+        urlToImage,
+        publishedAt,
+        content,
+        saved: true,
+        keyword,
+        owner: req.user.userId,
+      });
+
+      newsItem
+        .save()
+        .then((item) =>
+          res
+            .status(201)
+            .send({ message: "News item saved successfully", item })
+        )
+        .catch((err) => {
+          console.error(err);
+          return res
+            .status(ERROR_CODES.SERVER_ERROR)
+            .send({ message: ERROR_MESSAGES.SERVER_ERROR });
+        });
+    })
     .catch((err) => {
       console.error(err);
-      return res
+      res
         .status(ERROR_CODES.SERVER_ERROR)
         .send({ message: ERROR_MESSAGES.SERVER_ERROR });
     });
@@ -66,7 +81,7 @@ const unsaveNewsItem = (req, res) => {
       .send({ message: ERROR_MESSAGES.BAD_REQUEST });
   }
 
-  NewsItems.findByIDAndRemove({ _id: id, owner: req.user.userId })
+  Article.findByIdAndRemove({ _id: id, owner: req.user.userId })
     .orfail()
     .then(() =>
       res.status(200).send({ message: "News item unsaved successful" })
@@ -83,8 +98,19 @@ const unsaveNewsItem = (req, res) => {
     });
 };
 
+const getSavedNewsItems = (req, res) => {
+  Article.find({ owner: req.user.userId })
+    .then((items) => res.send({ items }))
+    .catch((err) => {
+      console.error(err);
+      return res
+        .status(ERROR_CODES.SERVER_ERROR)
+        .send({ message: ERROR_MESSAGES.SERVER_ERROR });
+    });
+};
 module.exports = {
   getNewsItems,
   saveNewsItem,
   unsaveNewsItem,
+  getSavedNewsItems,
 };

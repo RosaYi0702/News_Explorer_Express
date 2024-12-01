@@ -1,13 +1,13 @@
 const router = require("express").Router();
 const authenticate = require("../middleware/auth");
 const {
-  getNewsItems,
+  getSavedNewsItems,
   saveNewsItem,
   unsaveNewsItem,
 } = require("../controllers/newsItem");
 
-router.get("/articles", authenticate, getNewsItems);
-router.post("/articles", authenticate, saveNewsItem);
-router.delete("/articles/:id", authenticate, unsaveNewsItem);
+router.get("/saved", authenticate, getSavedNewsItems);
+router.post("/saved", authenticate, saveNewsItem);
+router.delete("/:id", authenticate, unsaveNewsItem);
 
 module.exports = router;

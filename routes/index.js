@@ -8,11 +8,11 @@ const { getNewsItems } = require("../controllers/newsItem");
 
 router.post("/signin", signIn);
 router.post("/signup", signUp);
-router.get("/news", getNewsItems);
+//router.get("/news", getNewsItems);
 
 router.use(authMiddleware);
 router.use("/users", userRouter);
-router.use("/news", newsRouter);
+router.use("/articles", newsRouter);
 
 router.use((req, res) => {
   res.status(ERROR_CODES.NOT_FOUND).send({ message: ERROR_MESSAGES.NOT_FOUND });

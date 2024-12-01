@@ -46,7 +46,9 @@ const signUp = async (req, res, next) => {
       password: hashedPassword,
       username,
     });
-    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     res.status(201).send({ token, username: user.username, email: user.email });
   } catch (err) {
@@ -61,13 +63,12 @@ const signUp = async (req, res, next) => {
 
 const signIn = async (req, res, next) => {
   const { email, password } = req.body;
-  console.log("Incoming request:", req.body);
 
   if (!email || !password) {
     return next(new BadRequestError("Email and Password are required"));
   }
   try {
-    const user = await User.findOne({ email }).orFail();
+    const user = await User.findOne({ email }).select("+password");
     if (!user) {
       return next(new UnauthorizedError("Invalid Email and Password"));
     }
@@ -77,27 +78,29 @@ const signIn = async (req, res, next) => {
     if (!isMatch) {
       return next(new UnauthorizedError("Wrong Email or Password"));
     }
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
       expiresIn: "7d",
     });
-    res.status(200).send({ token });
+    res.status(200).send({ token, username: user.username, email: user.email });
   } catch (err) {
-    console.error(err);
-    if (err.name === "DocumentNotFoundError") {
-      return next(new UnauthorizedError("Cannot find the user"));
+    console.error("Sign-in Error:", err);
+
+    if (err.name === "ValidationError") {
+      return next(new BadRequestError("Validation Error"));
     }
+
     return next(new ServerError("Server Error"));
   }
 };
 
 const getCurrentUser = (req, res, next) => {
-  const { userId } = req.user;
+  const { _id } = req.user;
 
-  if (!validateObject(userId)) {
+  if (!validateObject(_id)) {
     return next(new BadRequestError("Invalid Object ID"));
   }
 
-  User.findById(userId)
+  User.findById(_id)
     .orFail()
     .select("-password")
     .then((user) => res.status(200).send(user))
