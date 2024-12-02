@@ -33,9 +33,9 @@ const articleSchema = new mongoose.Schema({
   content: { type: String, default: null },
   saved: { type: Boolean, default: false },
   keyword: { type: String, default: null },
-  owner: {
+  user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "user",
+    ref: "User",
     required: true,
   },
 });

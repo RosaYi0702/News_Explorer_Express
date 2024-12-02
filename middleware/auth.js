@@ -23,6 +23,7 @@ module.exports = (req, res, next) => {
       throw new Error("Invalid token format");
     }
     payload = jwt.verify(token, JWT_SECRET);
+    req.user = { _id: payload._id };
   } catch (err) {
     return next(
       new UnauthorizedError("Token verification failed: It is Unauthorized")
