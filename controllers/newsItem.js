@@ -26,6 +26,7 @@ const saveNewsItem = async (req, res) => {
       keyword,
     } = req.body;
 
+    console.log("req.body:", req.body);
     if (!source?.id || !source?.name || !title || !url || !publishedAt) {
       return res
         .status(ERROR_CODES.BAD_REQUEST)
@@ -38,6 +39,7 @@ const saveNewsItem = async (req, res) => {
     });
 
     if (existingArticle) {
+      console.log("existingArticle:", existingArticle);
       return res.status(409).send({ message: "Article already saved" });
     }
 

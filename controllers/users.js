@@ -13,19 +13,6 @@ function validateObject(id) {
   return mongoose.Types.ObjectId.isValid(id);
 }
 
-const getUsers = (req, res, next) => {
-  User.find({})
-    .then((users) => {
-      if (!user) {
-      }
-      res.send(users);
-    })
-    .catch((err) => {
-      console.error(err);
-      return next(new ServerError("Server Error"));
-    });
-};
-
 const signUp = async (req, res, next) => {
   const { email, password, username } = req.body;
 
@@ -63,34 +50,24 @@ const signUp = async (req, res, next) => {
 
 const signIn = async (req, res, next) => {
   const { email, password } = req.body;
+  console.log("req.body:", req.body);
 
   if (!email || !password) {
     return next(new BadRequestError("Email and Password are required"));
   }
-  try {
-    const user = await User.findOne({ email }).select("+password");
-    if (!user) {
-      return next(new UnauthorizedError("Invalid Email and Password"));
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      return next(new UnauthorizedError("Wrong Email or Password"));
-    }
-    const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-      expiresIn: "7d",
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      return res.send({ token });
+    })
+    .catch((err) => {
+      if (err.message === "Incorrect email or password") {
+        return next(new UnauthorizedError("Incorrect email or password"));
+      }
+      return next(err);
     });
-    res.status(200).send({ token, username: user.username, email: user.email });
-  } catch (err) {
-    console.error("Sign-in Error:", err);
-
-    if (err.name === "ValidationError") {
-      return next(new BadRequestError("Validation Error"));
-    }
-
-    return next(new ServerError("Server Error"));
-  }
 };
 
 const getCurrentUser = (req, res, next) => {
@@ -116,4 +93,4 @@ const getCurrentUser = (req, res, next) => {
     });
 };
 
-module.exports = { getUsers, signUp, signIn, getCurrentUser };
+module.exports = { signUp, signIn, getCurrentUser };

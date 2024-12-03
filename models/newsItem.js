@@ -3,8 +3,8 @@ const validator = require("validator");
 
 const articleSchema = new mongoose.Schema({
   source: {
-    id: { type: String, require: true },
-    name: { type: String, require: true },
+    id: { type: String, default: null },
+    name: { type: String, default: null },
   },
   author: { type: String, default: null },
   title: { type: String, required: true },
