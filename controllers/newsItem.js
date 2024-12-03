@@ -1,5 +1,6 @@
 const Article = require("../models/newsItem");
 const { ERROR_CODES, ERROR_MESSAGES } = require("../utils/errors");
+const mongoose = require("mongoose");
 
 const getNewsItems = (req, res) => {
   Article.find({ user: req.user._id })
