@@ -27,7 +27,7 @@ const saveNewsItem = async (req, res) => {
     } = req.body;
 
     console.log("req.body:", req.body);
-    if (!source?.id || !source?.name || !title || !url || !publishedAt) {
+    if (!title || !url || !publishedAt) {
       return res
         .status(ERROR_CODES.BAD_REQUEST)
         .send({ message: ERROR_MESSAGES.BAD_REQUEST });
@@ -61,7 +61,7 @@ const saveNewsItem = async (req, res) => {
       .status(201)
       .send({ message: "News item saved successfully", item: newsItem });
   } catch (err) {
-    console.error(err);
+    console.error("Error saving news item:", err);
     return res
       .status(ERROR_CODES.SERVER_ERROR)
       .send({ message: ERROR_MESSAGES.SERVER_ERROR });
@@ -70,23 +70,26 @@ const saveNewsItem = async (req, res) => {
 
 const unsaveNewsItem = (req, res) => {
   const { id } = req.params;
-  if (!id.match(/^[0-9a-fA-F]{24}$/)) {
-    return res
-      .status(ERROR_CODES.BAD_REQUEST)
-      .send({ message: ERROR_MESSAGES.BAD_REQUEST });
+  console.log("ussaneNewsItem.id", id);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).send({ error: "Invalid ID format" });
   }
 
   Article.findByIdAndRemove({ _id: id, user: req.user._id })
-    .orfail()
-    .then(() =>
-      res.status(200).send({ message: "News item unsaved successful" })
-    )
+    .orFail()
+    .then((deletedArticle) => {
+      if (!deletedArticle) {
+        return res.status(404).send({ message: "Article not found" });
+      }
+      res.status(200).send({ message: "News item unsaved successful" });
+    })
     .catch((err) => {
       if (err.name === "DocumentNotFoundError") {
         return res
           .status(ERROR_CODES.NOT_FOUND)
           .send({ message: ERROR_MESSAGES.NOT_FOUND });
       }
+      console.error("Error unsaving news item:", err);
       return res
         .status(ERROR_CODES.SERVER_ERROR)
         .send({ message: ERROR_MESSAGES.SERVER_ERROR });
